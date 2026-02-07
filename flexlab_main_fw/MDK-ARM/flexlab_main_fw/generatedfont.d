@@ -1,0 +1,10 @@
+flexlab_main_fw\generatedfont.o: ../src/generated/fonts/src/generatedfont.cpp
+flexlab_main_fw\generatedfont.o: ../src/generated/fonts/include/fonts/GeneratedFont.hpp
+flexlab_main_fw\generatedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/ConstFont.hpp
+flexlab_main_fw\generatedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Font.hpp
+flexlab_main_fw\generatedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Unicode.hpp
+flexlab_main_fw\generatedfont.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+flexlab_main_fw\generatedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Types.hpp
+flexlab_main_fw\generatedfont.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\assert.h
+flexlab_main_fw\generatedfont.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+flexlab_main_fw\generatedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Config.hpp

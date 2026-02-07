@@ -1,0 +1,126 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file    rtc.c
+  * @brief   This file provides code for the configuration
+  *          of the RTC instances.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2022 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "rtc.h"
+
+/* USER CODE BEGIN 0 */
+HAL_StatusTypeDef RTC_Set_Time(uint8_t hour,uint8_t min,uint8_t sec,uint8_t ampm)
+{
+	RTC_TimeTypeDef RTC_TimeStructure;
+	
+	RTC_TimeStructure.Hours=hour;
+	RTC_TimeStructure.Minutes=min;
+	RTC_TimeStructure.Seconds=sec;
+	RTC_TimeStructure.TimeFormat=ampm;
+	RTC_TimeStructure.DayLightSaving=RTC_DAYLIGHTSAVING_NONE;
+    RTC_TimeStructure.StoreOperation=RTC_STOREOPERATION_RESET;
+	return HAL_RTC_SetTime(&hrtc,&RTC_TimeStructure,RTC_FORMAT_BIN);	
+}
+
+HAL_StatusTypeDef RTC_Set_Date(uint8_t year,uint8_t month,uint8_t date,uint8_t week)
+{
+	RTC_DateTypeDef RTC_DateStructure;
+    
+	RTC_DateStructure.Date=date;
+	RTC_DateStructure.Month=month;
+	RTC_DateStructure.WeekDay=week;
+	RTC_DateStructure.Year=year;
+	return HAL_RTC_SetDate(&hrtc,&RTC_DateStructure,RTC_FORMAT_BIN);
+}
+/* USER CODE END 0 */
+
+RTC_HandleTypeDef hrtc;
+
+/* RTC init function */
+void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+
+  /* USER CODE END RTC_Init 2 */
+
+}
+
+void HAL_RTC_MspInit(RTC_HandleTypeDef* rtcHandle)
+{
+
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+  if(rtcHandle->Instance==RTC)
+  {
+  /* USER CODE BEGIN RTC_MspInit 0 */
+//	RTC_Set_Time(22,54,00,RTC_HOURFORMAT12_PM);
+//	RTC_Set_Date(21,06,04,2);		               	
+  /* USER CODE END RTC_MspInit 0 */
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+    PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    /* RTC clock enable */
+    __HAL_RCC_RTC_ENABLE();
+  /* USER CODE BEGIN RTC_MspInit 1 */
+
+  /* USER CODE END RTC_MspInit 1 */
+  }
+}
+
+void HAL_RTC_MspDeInit(RTC_HandleTypeDef* rtcHandle)
+{
+
+  if(rtcHandle->Instance==RTC)
+  {
+  /* USER CODE BEGIN RTC_MspDeInit 0 */
+
+  /* USER CODE END RTC_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_RTC_DISABLE();
+  /* USER CODE BEGIN RTC_MspDeInit 1 */
+
+  /* USER CODE END RTC_MspDeInit 1 */
+  }
+}
+
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */

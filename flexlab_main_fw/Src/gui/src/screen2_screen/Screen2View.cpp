@@ -1,0 +1,601 @@
+﻿#include <gui/screen2_screen/Screen2View.hpp>
+#include "BitmapDatabase.hpp"
+#include <math.h>
+
+#ifndef SIMULATOR
+#include "cmsis_os.h"
+
+extern osMessageQueueId_t SettingTxQueueHandle;
+extern osMessageQueueId_t LayerNumQueueHandle;
+extern osMessageQueueId_t LayerStatusQueueHandle;
+extern osMessageQueueId_t LayerCMDQueueHandle;
+#endif
+
+Screen2View::Screen2View():light_mode(0),auto_water_change(0),vent_mode(0),source_ct(0),
+	ContainerClickCallback(this, &Screen2View::ContainerClickHandler),//!
+	ButtonWithLabelClickCallback(this, &Screen2View::ButtonWithLabelClickHandler)
+{
+
+}
+
+void Screen2View::setupScreen()
+{
+	Screen2ViewBase::setupScreen();
+	
+	layer_cycle_schedule.setClickAction(ContainerClickCallback);
+	auto_change_schedule.setClickAction(ContainerClickCallback);
+	nus1_setting.setClickAction(ContainerClickCallback);
+	nus2_setting.setClickAction(ContainerClickCallback);
+	nus3_setting.setClickAction(ContainerClickCallback);
+	setting_auto_vent_schedule.setClickAction(ContainerClickCallback);
+	
+	button0.setClickAction(ButtonWithLabelClickCallback);
+	button1.setClickAction(ButtonWithLabelClickCallback);
+	button2.setClickAction(ButtonWithLabelClickCallback);
+	button3.setClickAction(ButtonWithLabelClickCallback);
+	button4.setClickAction(ButtonWithLabelClickCallback);
+	button5.setClickAction(ButtonWithLabelClickCallback);
+	button6.setClickAction(ButtonWithLabelClickCallback);
+	button7.setClickAction(ButtonWithLabelClickCallback);
+	button8.setClickAction(ButtonWithLabelClickCallback);
+	button9.setClickAction(ButtonWithLabelClickCallback);
+	
+	button0_1.setClickAction(ButtonWithLabelClickCallback);
+	button1_1.setClickAction(ButtonWithLabelClickCallback);
+	button2_1.setClickAction(ButtonWithLabelClickCallback);
+	button3_1.setClickAction(ButtonWithLabelClickCallback);
+	button4_1.setClickAction(ButtonWithLabelClickCallback);
+	button5_1.setClickAction(ButtonWithLabelClickCallback);
+	button6_1.setClickAction(ButtonWithLabelClickCallback);
+	button7_1.setClickAction(ButtonWithLabelClickCallback);
+	button8_1.setClickAction(ButtonWithLabelClickCallback);
+	button9_1.setClickAction(ButtonWithLabelClickCallback);
+	
+	presenter->get_layer_setting(&layer_settings, presenter->get_enter_layer()-1);		
+	
+	Unicode::itoa(layer_settings.cycle_schedule,cycle_scheduleBuffer1,CYCLE_SCHEDULEBUFFER1_SIZE,10);
+	Unicode::itoa(layer_settings.water_change_schedule,change_scheduleBuffer1,CHANGE_SCHEDULEBUFFER1_SIZE,10);
+	Unicode::itoa(layer_settings.nus1_volume,nus1_setting_vBuffer,NUS1_SETTING_V_SIZE,10);
+	Unicode::itoa(layer_settings.nus2_volume,nus2_setting_vBuffer,NUS2_SETTING_V_SIZE,10);
+	Unicode::itoa(layer_settings.nus3_volume,nus3_setting_vBuffer,NUS3_SETTING_V_SIZE,10);
+	Unicode::itoa(layer_settings.vent_schedule,vent_scheduleBuffer1,VENT_SCHEDULEBUFFER1_SIZE,10);
+	
+	if(layer_settings.cycle_schedule_hour_flag==1)
+		Unicode::snprintf(cycle_scheduleBuffer2, CYCLE_SCHEDULEBUFFER2_SIZE, (const uint16_t*)L"小时");
+	else
+		Unicode::snprintf(cycle_scheduleBuffer2, CYCLE_SCHEDULEBUFFER2_SIZE, (const uint16_t*)L"分钟");
+	
+	if(layer_settings.water_change_schedule_hour_flag==1)
+		Unicode::snprintf(change_scheduleBuffer2, CHANGE_SCHEDULEBUFFER2_SIZE, (const uint16_t*)L"小时");
+	else
+		Unicode::snprintf(change_scheduleBuffer2, CHANGE_SCHEDULEBUFFER2_SIZE, (const uint16_t*)L"分钟");
+
+	if(layer_settings.vent_schedule_hour_flag==1)
+		Unicode::snprintf(vent_scheduleBuffer2, VENT_SCHEDULEBUFFER2_SIZE, (const uint16_t*)L"小时");
+	else
+		Unicode::snprintf(vent_scheduleBuffer2, VENT_SCHEDULEBUFFER2_SIZE, (const uint16_t*)L"分钟");
+	
+	double_slider_light_schedule.set_slider(layer_settings.light_ontime, layer_settings.light_offtime);
+	
+	Unicode::snprintf(title_layerBuffer, TITLE_LAYER_SIZE, "%d", presenter->get_enter_layer());
+	
+	switch(presenter->get_enter_layer())
+	{
+		case 1:
+			layer_indicate.setBitmap(touchgfx::Bitmap(BITMAP_LAYER_1_INDICATE_ID));
+		break;
+		
+		case 2:
+			layer_indicate.setBitmap(touchgfx::Bitmap(BITMAP_LAYER_2_INDICATE_ID));
+		break;
+		
+		case 3:
+			layer_indicate.setBitmap(touchgfx::Bitmap(BITMAP_LAYER_3_INDICATE_ID));
+		break;
+		
+		default:break;		
+	}
+	
+	switch(layer_settings.light_status)
+	{
+		case 0:
+			Unicode::snprintf(flexButton_lightBuffer, FLEXBUTTON_LIGHT_SIZE, (const uint16_t*)L"关");
+			list.remove(light_schedule);
+		break;
+		
+		case 1:
+			Unicode::snprintf(flexButton_lightBuffer, FLEXBUTTON_LIGHT_SIZE, (const uint16_t*)L"开");
+			list.remove(light_schedule);
+		break;
+					
+		case 2:
+			Unicode::snprintf(flexButton_lightBuffer, FLEXBUTTON_LIGHT_SIZE, (const uint16_t*)L"定时");
+		break;
+		
+		default:break;
+	}
+	
+	switch(layer_settings.vent_mode)
+	{
+		case 0:
+			Unicode::snprintf(flexButton_ventBuffer, FLEXBUTTON_VENT_SIZE, (const uint16_t*)L"关");
+			list.remove(auto_vent_schedule);
+		break;
+		
+		case 1:
+			Unicode::snprintf(flexButton_ventBuffer, FLEXBUTTON_VENT_SIZE, (const uint16_t*)L"开");
+			list.remove(auto_vent_schedule);
+		break;
+					
+		case 2:
+			Unicode::snprintf(flexButton_ventBuffer, FLEXBUTTON_VENT_SIZE, (const uint16_t*)L"定时");
+		break;
+		
+		default:break;
+	}
+	
+	if(layer_settings.enable_status)
+		flexButton_layer_enable. forceState(true);
+	else
+		flexButton_layer_enable. forceState(false);
+	
+	if(flexButton_layer_enable.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_ON_ID)
+		Unicode::snprintf(flexButton_layer_enableBuffer, FLEXBUTTON_LAYER_ENABLE_SIZE, (const uint16_t*)L"已启用");
+	else if(flexButton_layer_enable.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_OFF_ID)
+		Unicode::snprintf(flexButton_layer_enableBuffer, FLEXBUTTON_LAYER_ENABLE_SIZE, (const uint16_t*)L"未启用");
+	
+	if(layer_settings.water_change_mode)
+	{
+		flexButton_auto_water_change. forceState(true);
+	}
+	else
+	{
+		flexButton_auto_water_change. forceState(false);
+		list.remove(auto_water_change_schedule);
+	}
+	
+	if(flexButton_auto_water_change.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_ON_MEDIUM_ID)
+		Unicode::snprintf(flexButton_auto_water_changeBuffer, FLEXBUTTON_AUTO_WATER_CHANGE_SIZE, (const uint16_t*)L"自动");
+	else if(flexButton_auto_water_change.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_OFF_MEDIUM_ID)
+		Unicode::snprintf(flexButton_auto_water_changeBuffer, FLEXBUTTON_AUTO_WATER_CHANGE_SIZE, (const uint16_t*)L"手动");
+	
+	flexButton_layer_enable.invalidate();
+	flexButton_auto_water_change.invalidate();
+	flexButton_light.invalidate();
+	flexButton_vent.invalidate();
+	list.invalidate();
+	
+	myLens1.setXY(140, 40);
+	myLens1.setLensBackgroundBitmap(BITMAP_LENS_IMAGE_ID);
+}
+
+void Screen2View::tearDownScreen()
+{
+    Screen2ViewBase::tearDownScreen();
+}
+
+void Screen2View::ContainerClickHandler(const Container& ct, const ClickEvent& evt)//!
+{	
+	if(&ct==&nus1_setting)
+	{
+		Unicode::snprintf(inputBuffer, INPUT_SIZE, nus1_setting_vBuffer);
+		source_ct=0;
+		input_s.show();
+	}
+	else if(&ct==&nus2_setting)
+	{
+		Unicode::snprintf(inputBuffer, INPUT_SIZE, nus2_setting_vBuffer);
+		source_ct=1;
+		input_s.show();
+	}
+	else if(&ct==&nus3_setting)
+	{
+		Unicode::snprintf(inputBuffer, INPUT_SIZE, nus3_setting_vBuffer);
+		source_ct=2;
+		input_s.show();
+	}
+	else if(&ct==&layer_cycle_schedule)
+	{
+		Unicode::snprintf(input_1Buffer1, INPUT_1BUFFER1_SIZE, cycle_scheduleBuffer1);
+		Unicode::snprintf(input_1Buffer2, INPUT_1BUFFER2_SIZE, cycle_scheduleBuffer2);
+		source_ct=3;
+		input_l.show();
+	}
+	else if(&ct==&auto_change_schedule)
+	{
+		Unicode::snprintf(input_1Buffer1, INPUT_1BUFFER1_SIZE, change_scheduleBuffer1);
+		Unicode::snprintf(input_1Buffer2, INPUT_1BUFFER2_SIZE, change_scheduleBuffer2);
+		source_ct=4;
+		input_l.show();
+	}
+	else if(&ct==&setting_auto_vent_schedule)
+	{
+		Unicode::snprintf(input_1Buffer1, INPUT_1BUFFER1_SIZE, vent_scheduleBuffer1);
+		Unicode::snprintf(input_1Buffer2, INPUT_1BUFFER2_SIZE, vent_scheduleBuffer2);
+		source_ct=5;
+		input_l.show();
+	}
+	
+	b_num=0;
+}
+
+void Screen2View::ButtonWithLabelClickHandler(const ButtonWithLabel& bt, const ClickEvent& evt)//!
+{
+	if(evt.getType()==evt.PRESSED)
+	{
+		if(&bt==&button0)input_buf('0',inputBuffer);
+		if(&bt==&button1)input_buf('1',inputBuffer);
+		if(&bt==&button2)input_buf('2',inputBuffer);
+		if(&bt==&button3)input_buf('3',inputBuffer);
+		if(&bt==&button4)input_buf('4',inputBuffer);
+		if(&bt==&button5)input_buf('5',inputBuffer);
+		if(&bt==&button6)input_buf('6',inputBuffer);
+		if(&bt==&button7)input_buf('7',inputBuffer);
+		if(&bt==&button8)input_buf('8',inputBuffer);
+		if(&bt==&button9)input_buf('9',inputBuffer);
+		
+		if(&bt==&button0_1)input_buf('0',input_1Buffer1);
+		if(&bt==&button1_1)input_buf('1',input_1Buffer1);
+		if(&bt==&button2_1)input_buf('2',input_1Buffer1);
+		if(&bt==&button3_1)input_buf('3',input_1Buffer1);
+		if(&bt==&button4_1)input_buf('4',input_1Buffer1);
+		if(&bt==&button5_1)input_buf('5',input_1Buffer1);
+		if(&bt==&button6_1)input_buf('6',input_1Buffer1);
+		if(&bt==&button7_1)input_buf('7',input_1Buffer1);
+		if(&bt==&button8_1)input_buf('8',input_1Buffer1);
+		if(&bt==&button9_1)input_buf('9',input_1Buffer1);
+	}
+	input.invalidate();
+	input_1.invalidate();
+}
+
+void Screen2View::handleTickEvent()
+{
+	static uint16_t t;
+    t++;
+
+	if(t%50==0)
+	{
+#ifndef SIMULATOR
+		if(osMessageQueueGetSpace(LayerStatusQueueHandle)!=3)
+		{	
+			q_Layer_StatusTypeDef q_Layer_Status;
+
+			osMessageQueueGet(LayerStatusQueueHandle, &q_Layer_Status, (uint8_t *)1, 2);
+#else
+		{
+			q_Layer_StatusTypeDef q_Layer_Status={0,0,0,0,1};
+#endif
+			
+			if(q_Layer_Status.layer_num==presenter->get_enter_layer())
+			{
+				temp_Graph.addDataPoint((int)q_Layer_Status.temp);
+				
+				switch(q_Layer_Status.layer_state)
+				{
+					case 0:
+						Unicode::snprintf(layer_stateBuffer, LAYER_STATE_SIZE, (const uint16_t*)L"就绪");
+					break;
+							
+					case 1:
+						Unicode::snprintf(layer_stateBuffer, LAYER_STATE_SIZE, (const uint16_t*)L"正在通风");
+					break;
+					
+					case 2:
+						Unicode::snprintf(layer_stateBuffer, LAYER_STATE_SIZE, (const uint16_t*)L"正在换水");
+					break;
+					
+					case 3:
+						Unicode::snprintf(layer_stateBuffer, LAYER_STATE_SIZE, (const uint16_t*)L"未启用");
+					break;
+					
+					default:
+					break;
+				}
+				
+				Unicode::snprintf(layer_tempBuffer, LAYER_TEMP_SIZE, (const uint16_t*)L"%d", q_Layer_Status.temp);
+				
+				if(q_Layer_Status.light_status)
+					Unicode::snprintf(layer_lightBuffer,LAYER_LIGHT_SIZE,(const uint16_t*)L"开");
+				else 
+					Unicode::snprintf(layer_lightBuffer,LAYER_LIGHT_SIZE,(const uint16_t*)L"关");
+				
+				if(q_Layer_Status.cycle_status)
+					Unicode::snprintf(layer_cyclingBuffer,LAYER_CYCLING_SIZE,(const uint16_t*)L"开");
+				else 
+					Unicode::snprintf(layer_cyclingBuffer,LAYER_CYCLING_SIZE,(const uint16_t*)L"关");
+			
+				invalidate();
+			}
+		}
+	}
+	
+    // Insert each second tick
+//    if (t % 50 == 0)
+//    {
+//        float yMax = temp_Graph.getGraphRangeYMaxAsFloat();
+//
+//        // Insert "random" points along a sine wave
+//        temp_Graph.addDataPoint((int)((sin(t * 0.02f) + 1.0f) * (yMax / 2.2f)));
+//    }
+	
+	double_slider_light_schedule.handleTickEvent();
+}
+
+void Screen2View::layer_enable_ButtonPressed()
+{
+	if(flexButton_layer_enable.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_ON_ID)
+	{
+		Unicode::snprintf(flexButton_layer_enableBuffer, FLEXBUTTON_LAYER_ENABLE_SIZE, (const uint16_t*)L"已启用");
+		layer_settings.enable_status=1;
+	}
+	else if(flexButton_layer_enable.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_OFF_ID)
+	{
+		Unicode::snprintf(flexButton_layer_enableBuffer, FLEXBUTTON_LAYER_ENABLE_SIZE, (const uint16_t*)L"未启用");
+		layer_settings.enable_status=0;
+	}
+	flexButton_layer_enable.invalidate();
+}
+
+void Screen2View::light_ButtonPressed()
+{
+	static uint8_t flag=0;
+	
+	layer_settings.light_status++;
+	if(layer_settings.light_status>2)
+		layer_settings.light_status=0;
+	
+	switch(layer_settings.light_status)
+	{
+		case 0:
+			Unicode::snprintf(flexButton_lightBuffer, FLEXBUTTON_LIGHT_SIZE, (const uint16_t*)L"关");
+			if(flag)
+			{
+				list.remove(light_schedule);
+				flag=0;
+			}		
+		break;
+		
+		case 1:
+			Unicode::snprintf(flexButton_lightBuffer, FLEXBUTTON_LIGHT_SIZE, (const uint16_t*)L"开");
+			if(flag)
+			{
+				list.remove(light_schedule);
+				flag=0;
+			}	
+		break;
+					
+		case 2:
+			Unicode::snprintf(flexButton_lightBuffer, FLEXBUTTON_LIGHT_SIZE, (const uint16_t*)L"定时");
+			flag=1;
+			list.insert(&light,light_schedule);
+		break;
+		
+		default:break;
+	}
+	
+	flexButton_light.invalidate();
+	list.invalidate();
+}
+
+void Screen2View::button_set_spectrumButtonPressed()
+{
+	input_spectrum.show();
+}
+
+void Screen2View::auto_waterButtonPressed()
+{
+	if(flexButton_auto_water_change.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_ON_MEDIUM_ID)
+	{
+		Unicode::snprintf(flexButton_auto_water_changeBuffer, FLEXBUTTON_AUTO_WATER_CHANGE_SIZE, (const uint16_t*)L"自动");
+		layer_settings.water_change_mode=1;
+		list.insert(&layer_water_change,auto_water_change_schedule);
+	}
+	else if(flexButton_auto_water_change.getCurrentlyDisplayedBitmap()==BITMAP_BUTTON_TOGGLE_OFF_MEDIUM_ID)
+	{
+		Unicode::snprintf(flexButton_auto_water_changeBuffer, FLEXBUTTON_AUTO_WATER_CHANGE_SIZE, (const uint16_t*)L"手动");
+		layer_settings.water_change_mode=0;
+		list.remove(auto_water_change_schedule);
+	}
+	
+	flexButton_auto_water_change.invalidate();
+	list.invalidate();
+}
+
+void Screen2View::ventButtonPressed()
+{
+	static uint8_t flag2=0;
+	
+	layer_settings.vent_mode++;
+	if(layer_settings.vent_mode>2)
+		layer_settings.vent_mode=0;
+	
+	switch(layer_settings.vent_mode)
+	{
+		case 0:
+			Unicode::snprintf(flexButton_ventBuffer, FLEXBUTTON_VENT_SIZE, (const uint16_t*)L"关");
+			if(flag2)
+			{
+				list.remove(auto_vent_schedule);
+				flag2=0;
+			}		
+		break;
+		
+		case 1:
+			Unicode::snprintf(flexButton_ventBuffer, FLEXBUTTON_VENT_SIZE, (const uint16_t*)L"开");
+			if(flag2)
+			{
+				list.remove(auto_vent_schedule);
+				flag2=0;
+			}	
+		break;
+					
+		case 2:
+			Unicode::snprintf(flexButton_ventBuffer, FLEXBUTTON_VENT_SIZE, (const uint16_t*)L"定时");
+			flag2=1;
+			list.insert(&vent,auto_vent_schedule);
+		break;
+		
+		default:break;
+	}
+	
+	flexButton_vent.invalidate();
+	list.invalidate();
+}
+
+void Screen2View::zoomButtonPressed()
+{
+	static bool zoom_flag;
+	
+	if(zoom_flag==false)
+	{
+		add(myLens1);
+		zoom_flag=true;
+	}
+	else
+	{
+		remove(myLens1);
+		zoom_flag=false;
+	}	
+	
+	invalidate();	
+}
+
+void Screen2View::input_l_cancelButtonPressed()
+{
+    input_l.hide();
+}
+
+void Screen2View::input_s_cancelButtonPressed()
+{
+    input_s.hide();
+}
+
+void Screen2View::input_spectrum_cancelButtonPressed()
+{
+    input_spectrum.hide();
+}
+
+void Screen2View::input_s_confirmButtonPressed()
+{
+	switch(source_ct)
+	{
+		case 0:
+			Unicode::snprintf(nus1_setting_vBuffer, NUS1_SETTING_V_SIZE, inputBuffer);
+		break;
+		
+		case 1:
+			Unicode::snprintf(nus2_setting_vBuffer, NUS2_SETTING_V_SIZE, inputBuffer);
+		break;
+		
+		case 2:
+			Unicode::snprintf(nus3_setting_vBuffer, NUS3_SETTING_V_SIZE, inputBuffer);
+		break;
+		
+		default:
+		break;
+	}
+
+	input_s.hide();
+}
+
+void Screen2View::input_l_confirmButtonPressed()
+{
+	switch(source_ct)
+	{
+		case 3:
+			Unicode::snprintf(cycle_scheduleBuffer1, CYCLE_SCHEDULEBUFFER1_SIZE, input_1Buffer1);
+			Unicode::snprintf(cycle_scheduleBuffer2, CYCLE_SCHEDULEBUFFER2_SIZE, input_1Buffer2);
+		break;
+		
+		case 4:
+			Unicode::snprintf(change_scheduleBuffer1, CHANGE_SCHEDULEBUFFER1_SIZE, input_1Buffer1);
+			Unicode::snprintf(change_scheduleBuffer2, CHANGE_SCHEDULEBUFFER2_SIZE, input_1Buffer2);
+		break;
+		
+		case 5:
+			Unicode::snprintf(vent_scheduleBuffer1, VENT_SCHEDULEBUFFER1_SIZE, input_1Buffer1);
+			Unicode::snprintf(vent_scheduleBuffer2, VENT_SCHEDULEBUFFER2_SIZE, input_1Buffer2);
+		break;
+		
+		default:
+		break;
+	}
+
+	input_l.hide();
+}
+
+void Screen2View::input_spectrum_confirmButtonPressed()
+{
+    input_spectrum.hide();
+}
+
+void Screen2View::set_hourButtonPressed()
+{
+    Unicode::snprintf(input_1Buffer2, INPUT_1BUFFER2_SIZE, (const uint16_t*)L"小时");
+	input_1.invalidate();
+}
+
+void Screen2View::set_minuteButtonPressed()
+{
+    Unicode::snprintf(input_1Buffer2, INPUT_1BUFFER2_SIZE, (const uint16_t*)L"分钟");
+	input_1.invalidate();
+}
+
+void Screen2View::button_backButtonPressed_save()
+{
+	double_slider_light_schedule.get_slider(&layer_settings.light_ontime, &layer_settings.light_offtime);
+	
+	layer_settings.cycle_schedule=Unicode::atoi(cycle_scheduleBuffer1);
+	layer_settings.water_change_schedule=Unicode::atoi(change_scheduleBuffer1);
+	layer_settings.nus1_volume=Unicode::atoi(nus1_setting_vBuffer);
+	layer_settings.nus2_volume=Unicode::atoi(nus2_setting_vBuffer);
+	layer_settings.nus3_volume=Unicode::atoi(nus3_setting_vBuffer);
+	layer_settings.vent_schedule=Unicode::atoi(vent_scheduleBuffer1);
+	
+	if(Unicode::strncmp_ignore_whitespace(cycle_scheduleBuffer2, (const uint16_t*)L"小时", 10)==0)
+		layer_settings.cycle_schedule_hour_flag=1;
+	else if(Unicode::strncmp_ignore_whitespace(cycle_scheduleBuffer2, (const uint16_t*)L"分钟", 10)==0)
+		layer_settings.cycle_schedule_hour_flag=0;
+	
+	if(Unicode::strncmp_ignore_whitespace(change_scheduleBuffer2, (const uint16_t*)L"小时", 10)==0)
+		layer_settings.water_change_schedule_hour_flag=1;
+	else if(Unicode::strncmp_ignore_whitespace(change_scheduleBuffer2, (const uint16_t*)L"分钟", 10)==0)
+		layer_settings.water_change_schedule_hour_flag=0;
+	
+	if(Unicode::strncmp_ignore_whitespace(vent_scheduleBuffer2, (const uint16_t*)L"小时", 10)==0)
+		layer_settings.vent_schedule_hour_flag=1;
+	else if(Unicode::strncmp_ignore_whitespace(vent_scheduleBuffer2, (const uint16_t*)L"分钟", 10)==0)
+		layer_settings.vent_schedule_hour_flag=0;
+	
+	presenter->set_layer_setting(&layer_settings, presenter->get_enter_layer()-1);
+
+#ifndef SIMULATOR		
+	const Layer_SettingTypeDef q_layer_settings=layer_settings;
+	const uint8_t q_layer_num= presenter->get_enter_layer();
+	
+	osMessageQueuePut(SettingTxQueueHandle, &q_layer_settings, 1, 100);
+	osMessageQueuePut(LayerNumQueueHandle, &q_layer_num, 1, 100);
+#endif
+}
+
+void Screen2View::water_change_nowButtonPressed()
+{
+#ifndef SIMULATOR	
+    const uint32_t CMD=0x00000001;
+	const uint8_t q_layer_num= presenter->get_enter_layer();
+	
+	osMessageQueuePut(LayerCMDQueueHandle, &CMD, 1, 100);
+	osMessageQueuePut(LayerNumQueueHandle, &q_layer_num, 1, 100);
+#endif
+}
+
+void Screen2View::input_buf(char in,Unicode::UnicodeChar* buffer)
+{
+	in_buf[b_num]=in;
+	b_num++;
+	if(b_num>9)
+		b_num=9;	
+	else
+		Unicode::snprintf(buffer, b_num+1, in_buf);
+}

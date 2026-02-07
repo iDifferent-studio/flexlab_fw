@@ -1,0 +1,2 @@
+flexlab_main_fw\image_blue_clocks_hands_clock_standard_second_hand.o: ../src/generated/images/src/__designer/image_blue_clocks_hands_clock_standard_second_hand.cpp
+flexlab_main_fw\image_blue_clocks_hands_clock_standard_second_hand.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Config.hpp

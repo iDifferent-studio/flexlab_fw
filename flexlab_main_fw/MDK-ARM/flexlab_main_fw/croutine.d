@@ -1,0 +1,14 @@
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/croutine.c
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+flexlab_main_fw\croutine.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+flexlab_main_fw\croutine.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+flexlab_main_fw\croutine.o: ../Inc/FreeRTOSConfig.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/croutine.h
+flexlab_main_fw\croutine.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h

@@ -1,0 +1,15 @@
+flexlab_main_fw\applicationfontprovider.o: ../src/generated/fonts/src/applicationfontprovider.cpp
+flexlab_main_fw\applicationfontprovider.o: ../src/generated/fonts/include/fonts/ApplicationFontProvider.hpp
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/FontManager.hpp
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Font.hpp
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Unicode.hpp
+flexlab_main_fw\applicationfontprovider.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Types.hpp
+flexlab_main_fw\applicationfontprovider.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\assert.h
+flexlab_main_fw\applicationfontprovider.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Config.hpp
+flexlab_main_fw\applicationfontprovider.o: ../src/generated/fonts/include/fonts/GeneratedFont.hpp
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/ConstFont.hpp
+flexlab_main_fw\applicationfontprovider.o: ../src/generated/texts/include/texts/TypedTextDatabase.hpp
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/TypedText.hpp
+flexlab_main_fw\applicationfontprovider.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Texts.hpp

@@ -1,0 +1,27 @@
+
+{
+  "Application": {
+    "Name": "flexlab_main_fw",
+    "TouchGfxPath": "../Middlewares/ST/touchgfx",
+    "AvailableColorDepths": [ 16 ],
+    "AvailableLCDs":
+    {
+      "16": "LCD16bpp"
+    },
+    "AvailableResolutions": [
+      {
+        "Width": 1024,
+        "Height": 600
+      }
+    ],
+    "PostGenerateTargetCommand": "touchgfx update_project",
+    "Family": "STM32F4",
+    "SubFamily": "STM32F429/439",
+    "Platform": "m4",
+    "ProjectFile": "../flexlab_main_fw.ioc",
+    "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
+    "OptionalComponents": [
+    ]
+  },
+  "Version": "4.20.0"
+}

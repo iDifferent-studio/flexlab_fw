@@ -1,0 +1,16 @@
+flexlab_main_fw\cachedfont.o: ../src/generated/fonts/src/cachedfont.cpp
+flexlab_main_fw\cachedfont.o: ../src/generated/fonts/include/fonts/CachedFont.hpp
+flexlab_main_fw\cachedfont.o: ../src/generated/fonts/include/fonts/FontCache.hpp
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Font.hpp
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Unicode.hpp
+flexlab_main_fw\cachedfont.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Types.hpp
+flexlab_main_fw\cachedfont.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\assert.h
+flexlab_main_fw\cachedfont.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Config.hpp
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/TypedText.hpp
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/Texts.hpp
+flexlab_main_fw\cachedfont.o: ../src/generated/fonts/include/fonts/ApplicationFontProvider.hpp
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/FontManager.hpp
+flexlab_main_fw\cachedfont.o: ../src/generated/fonts/include/fonts/GeneratedFont.hpp
+flexlab_main_fw\cachedfont.o: ../middlewares/st/touchgfx/framework/include/touchgfx/ConstFont.hpp

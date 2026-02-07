@@ -1,0 +1,2 @@
+flexlab_main_fw\image_blue_clocks_backgrounds_clock_standard_background.o: ../src/generated/images/src/__designer/image_blue_clocks_backgrounds_clock_standard_background.cpp
+flexlab_main_fw\image_blue_clocks_backgrounds_clock_standard_background.o: ../middlewares/st/touchgfx/framework/include/touchgfx/hal/Config.hpp

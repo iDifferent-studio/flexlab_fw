@@ -1,0 +1,16 @@
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/tasks.c
+flexlab_main_fw\tasks.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+flexlab_main_fw\tasks.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+flexlab_main_fw\tasks.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+flexlab_main_fw\tasks.o: D:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+flexlab_main_fw\tasks.o: ../Inc/FreeRTOSConfig.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h
+flexlab_main_fw\tasks.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/stack_macros.h
